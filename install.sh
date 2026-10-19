@@ -27,6 +27,18 @@ if [ "$BUNDLE" -eq 1 ]; then
     mv "$ZIP_NAME" ..
 else
     echo ":: Installing extension..."
-    gnome-extensions install -f "$ZIP_NAME"
-    rm "$ZIP_NAME"
+    DEST="$HOME/.local/share/gnome-shell/extensions/$NAME@$DOMAIN"
+
+    # gnome-extensions install 失败时会先删除旧目录再复制，导致扩展丢失，
+    # 因此失败时兜底为直接解包（需注销重登或 killall -HUP gnome-shell 生效）
+    if gnome-extensions install -f "$ZIP_NAME"; then
+        rm "$ZIP_NAME"
+    else
+        echo ":: gnome-extensions install failed, falling back to unzip..."
+        rm -rf "$DEST"
+        mkdir -p "$DEST"
+        unzip -oq "$ZIP_NAME" -d "$DEST"
+        rm "$ZIP_NAME"
+        echo ":: Installed to $DEST"
+    fi
 fi

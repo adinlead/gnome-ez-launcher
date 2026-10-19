@@ -51,6 +51,24 @@ msgstr "启用后，固定到收藏夹的应用程序将出现在应用程序网
 msgid "Group by Category"
 msgstr "按类型分组"
 
+msgid "Reading Search"
+msgstr "读音检索"
+
+msgid "Match apps by name readings, e.g. pinyin for Chinese names"
+msgstr "按应用名的读音匹配搜索，如中文名可用拼音检索"
+
+msgid "Off"
+msgstr "关闭"
+
+msgid "Auto"
+msgstr "自动"
+
+msgid "Pinyin (拼音)"
+msgstr "拼音"
+
+msgid "Update Search Cache"
+msgstr "更新检索缓存"
+
 msgid "Edit Categories Profile"
 msgstr "编辑分组配置"
 

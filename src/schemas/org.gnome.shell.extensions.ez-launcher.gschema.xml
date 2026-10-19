@@ -38,5 +38,17 @@
       <default>24</default>
     </key>
 
+    <!-- 读音检索策略：off 关闭；auto 按当前语言自动选择；其余值为策略 id
+         （可用策略由 src/searchStrategies.js 注册，见其中接入说明） -->
+    <key name="reading-search" type="s">
+      <default>'auto'</default>
+    </key>
+
+    <!-- 手动更新检索缓存的跨进程信号键：prefs 每次点击按钮写入当前时间戳，
+         extension 监听 changed:: 信号后对当前策略执行 updateCache + 重建索引 -->
+    <key name="search-cache-refresh" type="u">
+      <default>0</default>
+    </key>
+
   </schema>
 </schemalist>

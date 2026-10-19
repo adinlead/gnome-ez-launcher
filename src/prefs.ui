@@ -65,6 +65,22 @@
         </child>
 
         <child>
+          <object class="AdwComboRow" id="reading-search">
+            <property name="title" translatable="yes">Reading Search</property>
+            <property name="subtitle" translatable="yes">Match apps by name readings, e.g. pinyin for Chinese names</property>
+            <property name="model">
+              <object class="GtkStringList" id="reading-search-model"/>
+            </property>
+          </object>
+        </child>
+
+        <child>
+          <object class="AdwButtonRow" id="refresh-search-cache">
+            <property name="title" translatable="yes">Update Search Cache</property>
+          </object>
+        </child>
+
+        <child>
           <object class="AdwActionRow" id="edit-categories">
             <property name="title" translatable="yes">Edit Categories Profile</property>
             <property name="subtitle" translatable="yes">Open the categories configuration file</property>

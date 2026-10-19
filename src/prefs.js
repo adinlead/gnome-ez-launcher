@@ -1,7 +1,9 @@
 import Gio from 'gi://Gio';
 import Gtk from 'gi://Gtk';
 
-import { ExtensionPreferences } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
+import { listStrategies } from './searchStrategies.js';
 
 export default class EssentialTweaksPreferences extends ExtensionPreferences {
   fillPreferencesWindow(window) {
@@ -27,6 +29,8 @@ export default class EssentialTweaksPreferences extends ExtensionPreferences {
       settings.bind(key, builder.get_object(key), property, Gio.SettingsBindFlags.DEFAULT);
     });
 
+    this._bindReadingSearch(builder, settings);
+
     this._bindComboRow(builder, settings, 'app-sorting', ['usage', 'alphabetical']);
     this._bindComboRow(builder, settings, 'favorites-sorting', ['dash', 'usage', 'alphabetical']);
 
@@ -47,6 +51,29 @@ export default class EssentialTweaksPreferences extends ExtensionPreferences {
           console.log('File opened successfully');
         }
       });
+    });
+  }
+
+  // 读音检索策略下拉框：Off / Auto + 所有已注册策略，
+  // 新策略在 searchStrategies.js 注册后无需改动这里即可出现
+  _bindReadingSearch(builder, settings) {
+    const strategies = listStrategies();
+    const values = ['off', 'auto', ...strategies.map(strategy => strategy.id)];
+
+    // 配置中残留已移除的策略 id 时回退为 auto，避免下拉框选中越界
+    if (!values.includes(settings.get_string('reading-search')))
+      settings.set_string('reading-search', 'auto');
+
+    const model = builder.get_object('reading-search-model');
+    [_('Off'), _('Auto'), ...strategies.map(strategy => strategy.label)]
+      .forEach(label => model.append(label));
+
+    this._bindComboRow(builder, settings, 'reading-search', values);
+
+    // 「更新检索缓存」按钮：prefs 与 extension 是两个进程，这里通过写入
+    // 时间戳信号键通知 extension 重建当前策略的缓存（见 gschema 注释）
+    builder.get_object('refresh-search-cache').connect('activated', () => {
+      settings.set_uint('search-cache-refresh', Math.floor(Date.now() / 1000));
     });
   }
 
