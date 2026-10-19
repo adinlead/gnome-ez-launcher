@@ -70,10 +70,10 @@ This project is a fork of [Vertical App Grid](https://github.com/lublst/gnome-ve
 
 This project is licensed under the GNU General Public License v3.0. See [LICENSE](LICENSE) for details.
 
-## 默认布局
+## 默认布局 / Default layout
 
 ![Screenshot](assets/vertical-app-grid.png)
 
-## 按分类分组布局
+## 按分类分组布局 / Group layout by category
 
 ![Screenshot](assets/vertical-app-grid-categorize.png)
