@@ -31,6 +31,43 @@
 // extension.js 会在搜索时调用 createIndex() 建索引并按 search() 合并结果。
 // 设置里的「更新检索缓存」按钮会调用策略的 updateCache()（可选实现，
 // 用于更新词典等外部缓存），随后 extension 重建运行时索引。
+//
+// ============================================================================
+// 🤖 AI 开发提示（给后续 Agent）
+// ============================================================================
+// 【何时介入】
+//   - 用户说"加日语罗马字搜索"、"支持韩语初声"、"XX 语也按读音搜"时，
+//     不要改本文件的框架代码——只需在 src/strategies/ 下新建目录并注册。
+//   - 不要修改 extension.js 里的覆写逻辑，它对所有策略是通用的。
+//
+// 【最小可行策略骨架】
+//   每个策略目录必须包含 index.js（导出策略对象），其余文件按需：
+//     src/strategies/ja-romaji/
+//       ├── index.js      ← 必须：策略定义 + 注册
+//       ├── engine.js     ← 可选：匹配引擎（zh-pinyin 的 engine.js 可作参考）
+//       └── data.js       ← 可选：静态词典（若不需要词典可省略，如 vi 去声调）
+//
+// 【接口契约红线】
+//   - createIndex() 每次必须返回**全新**的索引实例，不能复用单例——extension.js
+//     会在应用增删后 clear() + 重建，旧实例不能残留状态
+//   - add(id, names) 中 names 是 .desktop 文件的候选名列表（含 Name/GenericName/
+//     翻译条目），策略应全部建索引以最大化命中率
+//   - search(query) 返回命中 id 数组即可，不需要排序；extension.js 会与原生
+//     搜索合并后按使用频率排序，策略内排序是多余的
+//   - updateCache() 允许返回 Promise——如果策略需要联网下载词典，这里是唯一
+//     入口；拼音策略词典内置于扩展包，故只重置内存缓存
+//
+// 【locale 匹配规则】
+//   locales 数组里填语言主子标签（如 ['ja']、['ko']、['vi']），框架对
+//   GLib.get_language_names() 的每个值取 split(/[-_.@]/)[0] 后比对，
+//   所以 ja_JP.UTF-8 也能命中 ['ja']。多语种环境下第一个匹配的策略胜出。
+//
+// 【词典数据来源建议】
+//   - 中文：mozillazg/pinyin-data（已用，见 tools/gen-pinyin-data.py）
+//   - 日语：github.com/kazuhikoarase/yomigana-dict 或 sudachidict
+//   - 韩语：kaist-ucs/jamo 分解，或 koalanlp 语料
+//   - 越南语/欧洲语言：直接在 engine.js 里做 Unicode 归一化 + 去变音符号，
+//     不需要额外词典文件
 // ============================================================================
 
 const _strategies = new Map();
