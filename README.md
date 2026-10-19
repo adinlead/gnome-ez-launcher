@@ -15,9 +15,18 @@ This project is a fork of [Vertical App Grid](https://github.com/lublst/gnome-ve
 - Category grouping with configurable categories
 - Smooth scrolling animation
 - Favorites management
+- Reading search (pinyin) for Chinese app names — search by full pinyin, initials, mixed input or prefix
+- Reading search is extensible by locale — add romaji for Japanese, jamo for Korean, etc. via the strategy interface
+- Built-in search cache refresh button in preferences
 - Multilingual support (English, Chinese)
 
 ## Updates
+
+**2026-10-19**
+- Add reading search framework with pluggable strategy interface
+- Implement zh-pinyin strategy supporting full pinyin, initials, mixed input and prefix matching
+- Add preferences: reading-search selector (off/auto/策略 id) and cache refresh button
+- Add unit tests for pinyin matching engine
 
 **2026-06-25**
 - Add category grouping feature
