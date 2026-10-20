@@ -1,5 +1,5 @@
 {
-  "description": "一个竖向滚动的应用网格，支持分类分组，可通过汉语拼音搜索应用。 \nA vertical app grid with category grouping function and supports searching for applications using Chinese Pinyin.",
+  "description": "一个竖向滚动的应用网格，支持分类分组，并支持通过汉语拼音搜索应用。 A vertical app grid with category grouping function and supports searching for applications using Chinese Pinyin.",
   "gettext-domain": "ez-launcher@linux.itez.cc",
   "name": "Ez Launcher",
   "settings-schema": "org.gnome.shell.extensions.ez-launcher",

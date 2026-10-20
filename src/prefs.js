@@ -65,7 +65,7 @@ export default class EssentialTweaksPreferences extends ExtensionPreferences {
       settings.set_string('reading-search', 'auto');
 
     const model = builder.get_object('reading-search-model');
-    [_('Off'), _('Auto'), ...strategies.map(strategy => strategy.label)]
+    [_('Off'), _('Auto'), ...strategies.map(strategy => _(strategy.label))]
       .forEach(label => model.append(label));
 
     this._bindComboRow(builder, settings, 'reading-search', values);

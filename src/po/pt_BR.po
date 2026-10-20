@@ -4,6 +4,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 msgid "Favorites"
 msgstr "Favoritos"
@@ -41,6 +42,39 @@ msgstr "Como no Dash"
 msgid "Show Favorites Section"
 msgstr "Exibir seção de favoritos"
 
+msgid "Show favorites in app grid"
+msgstr "Exibir favoritos na grade de aplicativos"
+
+msgid "When enabled, applications pinned to favorites will appear in the apps grid"
+msgstr "Quando ativado, os aplicativos fixados nos favoritos aparecerão na grade de aplicativos"
+
+msgid "Group by Category"
+msgstr "Agrupar por categoria"
+
+msgid "Reading Search"
+msgstr "Pesquisa por pronúncia"
+
+msgid "Match apps by name readings, e.g. pinyin for Chinese names"
+msgstr "Encontre aplicativos pela pronúncia do nome, por exemplo pinyin para nomes em chinês"
+
+msgid "Off"
+msgstr "Desativado"
+
+msgid "Auto"
+msgstr "Automático"
+
+msgid "Pinyin (拼音)"
+msgstr "Pinyin (拼音)"
+
+msgid "Update Search Cache"
+msgstr "Atualizar cache de pesquisa"
+
+msgid "Edit Categories Profile"
+msgstr "Editar perfil de categorias"
+
+msgid "Open the categories configuration file"
+msgstr "Abrir o arquivo de configuração de categorias"
+
 msgid "Smooth Scrolling"
 msgstr "Rolagem suave"
 
@@ -56,60 +90,44 @@ msgstr "Tamanho dos ícones"
 msgid "Icon Spacing"
 msgstr "Espaçamento dos ícones"
 
-
-msgid "Show favorites in app grid"
-msgstr "Show favorites in app grid"
-
-msgid "When enabled, applications pinned to favorites will appear in the apps grid"
-msgstr "When enabled, applications pinned to favorites will appear in the apps grid"
-
-msgid "Group by Category"
-msgstr "Group by Category"
-
-msgid "Edit Categories Profile"
-msgstr "Edit Categories Profile"
-
-msgid "Open the categories configuration file"
-msgstr "Open the categories configuration file"
-
 msgid "Development"
-msgstr "Development"
+msgstr "Desenvolvimento"
 
 msgid "Office"
-msgstr "Office"
+msgstr "Escritório"
 
 msgid "Network"
-msgstr "Network"
+msgstr "Rede"
 
 msgid "AudioVideo"
-msgstr "AudioVideo"
+msgstr "Áudio e vídeo"
 
 msgid "Audio"
-msgstr "Audio"
+msgstr "Áudio"
 
 msgid "Video"
-msgstr "Video"
+msgstr "Vídeo"
 
 msgid "Graphics"
-msgstr "Graphics"
+msgstr "Gráficos"
 
 msgid "Education"
-msgstr "Education"
+msgstr "Educação"
 
 msgid "Game"
-msgstr "Game"
+msgstr "Jogos"
 
 msgid "Utility"
-msgstr "Utility"
+msgstr "Utilitários"
 
 msgid "Accessories"
-msgstr "Accessories"
+msgstr "Acessórios"
 
 msgid "System"
-msgstr "System"
+msgstr "Sistema"
 
 msgid "Settings"
-msgstr "Settings"
+msgstr "Configurações"
 
 msgid "Other"
-msgstr "Other"
+msgstr "Outros"

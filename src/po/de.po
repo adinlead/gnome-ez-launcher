@@ -4,6 +4,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 msgid "Favorites"
 msgstr "Favoriten"
@@ -21,7 +22,7 @@ msgid "Preferences"
 msgstr "Einstellungen"
 
 msgid "App Grid"
-msgstr "Anwendungsübersicht"
+msgstr "Anwendungsraster"
 
 msgid "App Sorting"
 msgstr "Anwendungen sortieren nach"
@@ -39,7 +40,40 @@ msgid "As in Dash"
 msgstr "Wie im Dash"
 
 msgid "Show Favorites Section"
-msgstr "Favoriten anzeigen"
+msgstr "Favoritenbereich anzeigen"
+
+msgid "Show favorites in app grid"
+msgstr "Favoriten im Anwendungsraster anzeigen"
+
+msgid "When enabled, applications pinned to favorites will appear in the apps grid"
+msgstr "Wenn aktiviert, erscheinen an Favoriten angeheftete Anwendungen im Anwendungsraster"
+
+msgid "Group by Category"
+msgstr "Nach Kategorie gruppieren"
+
+msgid "Reading Search"
+msgstr "Suche nach Aussprache"
+
+msgid "Match apps by name readings, e.g. pinyin for Chinese names"
+msgstr "Anwendungen anhand der Aussprache ihres Namens finden, z. B. Pinyin für chinesische Namen"
+
+msgid "Off"
+msgstr "Aus"
+
+msgid "Auto"
+msgstr "Automatisch"
+
+msgid "Pinyin (拼音)"
+msgstr "Pinyin (拼音)"
+
+msgid "Update Search Cache"
+msgstr "Suchindex aktualisieren"
+
+msgid "Edit Categories Profile"
+msgstr "Kategorienprofil bearbeiten"
+
+msgid "Open the categories configuration file"
+msgstr "Die Kategorien-Konfigurationsdatei öffnen"
 
 msgid "Smooth Scrolling"
 msgstr "Flüssiges Scrollen"
@@ -56,33 +90,17 @@ msgstr "Symbolgröße"
 msgid "Icon Spacing"
 msgstr "Symbolabstand"
 
-
-msgid "Show favorites in app grid"
-msgstr "Show favorites in app grid"
-
-msgid "When enabled, applications pinned to favorites will appear in the apps grid"
-msgstr "When enabled, applications pinned to favorites will appear in the apps grid"
-
-msgid "Group by Category"
-msgstr "Group by Category"
-
-msgid "Edit Categories Profile"
-msgstr "Edit Categories Profile"
-
-msgid "Open the categories configuration file"
-msgstr "Open the categories configuration file"
-
 msgid "Development"
-msgstr "Development"
+msgstr "Entwicklung"
 
 msgid "Office"
-msgstr "Office"
+msgstr "Büro"
 
 msgid "Network"
-msgstr "Network"
+msgstr "Netzwerk"
 
 msgid "AudioVideo"
-msgstr "AudioVideo"
+msgstr "Audio und Video"
 
 msgid "Audio"
 msgstr "Audio"
@@ -91,25 +109,25 @@ msgid "Video"
 msgstr "Video"
 
 msgid "Graphics"
-msgstr "Graphics"
+msgstr "Grafik"
 
 msgid "Education"
-msgstr "Education"
+msgstr "Bildung"
 
 msgid "Game"
-msgstr "Game"
+msgstr "Spiele"
 
 msgid "Utility"
-msgstr "Utility"
+msgstr "Dienstprogramme"
 
 msgid "Accessories"
-msgstr "Accessories"
+msgstr "Zubehör"
 
 msgid "System"
 msgstr "System"
 
 msgid "Settings"
-msgstr "Settings"
+msgstr "Systemeinstellungen"
 
 msgid "Other"
-msgstr "Other"
+msgstr "Andere"
