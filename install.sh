@@ -21,7 +21,7 @@ for po in po/*.po; do
 done
 
 echo ":: Creating extension bundle..."
-zip -qr "$ZIP_NAME" . -x "po/*"
+zip -qr "$ZIP_NAME" . -x "po/*" "schemas/gschemas.compiled"
 
 if [ "$BUNDLE" -eq 1 ]; then
     mv "$ZIP_NAME" ..
@@ -29,16 +29,19 @@ else
     echo ":: Installing extension..."
     DEST="$HOME/.local/share/gnome-shell/extensions/$NAME@$DOMAIN"
 
-    # gnome-extensions install 失败时会先删除旧目录再复制，导致扩展丢失，
-    # 因此失败时兜底为直接解包（需注销重登或 killall -HUP gnome-shell 生效）
-    if gnome-extensions install -f "$ZIP_NAME"; then
-        rm "$ZIP_NAME"
-    else
-        echo ":: gnome-extensions install failed, falling back to unzip..."
+    # 安装交由系统扩展安装器完成：安装时它会自动对 schemas/ 执行 glib-compile-schemas，
+    # 因此打包无需携带 schemas/gschemas.compiled（需注销重登或 killall -HUP gnome-shell 生效）
+    if ! gnome-extensions install -f "$ZIP_NAME"; then
+        # 兜底：该命令偶发因 GIO 递归复制失败而中断，且失败前可能已删除旧目录。
+        # 手动解包不会编译 schema，故必须补跑 glib-compile-schemas，否则扩展加载时会报
+        # "Schema ... could not be found" 而直接失效。
+        echo ":: gnome-extensions install failed, falling back to manual unzip..."
         rm -rf "$DEST"
         mkdir -p "$DEST"
         unzip -oq "$ZIP_NAME" -d "$DEST"
-        rm "$ZIP_NAME"
+        glib-compile-schemas "$DEST/schemas"
         echo ":: Installed to $DEST"
     fi
+
+    rm "$ZIP_NAME"
 fi
