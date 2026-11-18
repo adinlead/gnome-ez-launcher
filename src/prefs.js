@@ -36,19 +36,14 @@ export default class EssentialTweaksPreferences extends ExtensionPreferences {
 
     const editCategoriesBtn = builder.get_object('edit-categories-btn');
     editCategoriesBtn.connect('clicked', () => {
-      console.log('Editing categories profile...');
-      console.log(`File path: ${this.path}/categories.js`);
-
       const filePath = Gio.File.new_for_path(`${this.path}/categories.js`);
       const uri = filePath.get_uri();
 
-      console.log(`URI: ${uri}`);
-
-      Gio.AppInfo.launch_default_for_uri_async(uri, null, null, null, (result, error) => {
-        if (error) {
+      Gio.AppInfo.launch_default_for_uri_async(uri, null, null, (_source, result) => {
+        try {
+          Gio.AppInfo.launch_default_for_uri_finish(result);
+        } catch (error) {
           console.error(`Failed to open file: ${error.message}`);
-        } else {
-          console.log('File opened successfully');
         }
       });
     });

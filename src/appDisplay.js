@@ -253,26 +253,10 @@ class VerticalAppDisplay extends St.Widget {
       });
 
       // Sort favorites
-      favAppInfos.sort((a, b) => {
-        switch (favSorting) {
-          case 'dash':
-            return favIds.indexOf(a.get_id()) - favIds.indexOf(b.get_id());
-          case 'usage':
-            return this._appUsage.compare(a.get_id(), b.get_id()) ?? 0;
-          case 'alphabetical': default:
-            return a.get_name().toLowerCase().localeCompare(b.get_name().toLowerCase());
-        }
-      });
+      favAppInfos.sort((a, b) => this._compareAppInfos(a, b, favSorting, favIds));
 
       // Sort main apps
-      mainAppInfos.sort((a, b) => {
-        switch (appSorting) {
-          case 'usage':
-            return this._appUsage.compare(a.get_id(), b.get_id()) ?? 0;
-          case 'alphabetical': default:
-            return a.get_name().toLowerCase().localeCompare(b.get_name().toLowerCase());
-        }
-      });
+      mainAppInfos.sort((a, b) => this._compareAppInfos(a, b, appSorting));
 
       // Add favorites
       for (const appInfo of favAppInfos) {
@@ -344,14 +328,7 @@ class VerticalAppDisplay extends St.Widget {
     for (const category in appsByCategory) {
       if (category === '_favorites') continue;
 
-      appsByCategory[category].sort((a, b) => {
-        switch (appSorting) {
-          case 'usage':
-            return this._appUsage.compare(a.get_id(), b.get_id()) ?? 0;
-          case 'alphabetical': default:
-            return a.get_name().toLowerCase().localeCompare(b.get_name().toLowerCase());
-        }
-      });
+      appsByCategory[category].sort((a, b) => this._compareAppInfos(a, b, appSorting));
 
       appsByCategory[category] = appsByCategory[category].map(appInfo => appInfo.get_id());
     }
@@ -361,16 +338,7 @@ class VerticalAppDisplay extends St.Widget {
       const favSorting = this._settings.get_string('favorites-sorting');
       const favIds = this._appFavorites._getIds();
 
-      appsByCategory['_favorites'].sort((a, b) => {
-        switch (favSorting) {
-          case 'dash':
-            return favIds.indexOf(a.get_id()) - favIds.indexOf(b.get_id());
-          case 'usage':
-            return this._appUsage.compare(a.get_id(), b.get_id()) ?? 0;
-          case 'alphabetical': default:
-            return a.get_name().toLowerCase().localeCompare(b.get_name().toLowerCase());
-        }
-      });
+      appsByCategory['_favorites'].sort((a, b) => this._compareAppInfos(a, b, favSorting, favIds));
 
       appsByCategory['_favorites'] = appsByCategory['_favorites'].map(appInfo => appInfo.get_id());
     }
@@ -378,64 +346,33 @@ class VerticalAppDisplay extends St.Widget {
     return appsByCategory;
   }
 
-  _loadApps() {
-    const installedApps = this._appSystem.get_installed();
+  _compareAppInfos(a, b, sorting, favoriteIds) {
+    if (sorting === 'dash' && favoriteIds)
+      return favoriteIds.indexOf(a.get_id()) - favoriteIds.indexOf(b.get_id());
 
-    const favs = [];
-    const apps = [];
+    if (sorting === 'usage')
+      return this._appUsage.compare(a.get_id(), b.get_id()) ?? 0;
 
-    // Filter out hidden apps and split off favorites
-    const favSection = this._settings.get_boolean('favorites-section');
+    return a.get_name().toLowerCase().localeCompare(b.get_name().toLowerCase());
+  }
 
-    installedApps.forEach(appInfo => { try {
-      const appId = appInfo.get_id();
-      const isFav = this._appFavorites.isFavorite(appId);
+  _clearRedisplayLater() {
+    if (!this._redisplayLater)
+      return;
 
-      if (this._parentalControls.shouldShowApp(appInfo)) {
-        if (favSection && isFav) {
-          favs.push(appInfo);
-        } else {
-          apps.push(appInfo);
-        }
-      }
-    } catch { } });
-
-    // Sort favorites
-    const favSorting = this._settings.get_string('favorites-sorting');
-    const favIds = this._appFavorites._getIds();
-
-    favs.sort((a, b) => {
-      switch (favSorting) {
-        case 'dash':
-          return favIds.indexOf(a.get_id()) - favIds.indexOf(b.get_id());
-
-        case 'usage':
-          return this._appUsage.compare(a.get_id(), b.get_id()) ?? 0;
-
-        case 'alphabetical': default:
-          return a.get_name().toLowerCase().localeCompare(b.get_name().toLowerCase());
-      }
-    });
-
-    // Sort apps
-    const appSorting = this._settings.get_string('app-sorting');
-
-    apps.sort((a, b) => {
-      switch (appSorting) {
-        case 'usage':
-          return this._appUsage.compare(a.get_id(), b.get_id()) ?? 0;
-
-        case 'alphabetical': default:
-          return a.get_name().toLowerCase().localeCompare(b.get_name().toLowerCase());
-      }
-    });
-
-    return [...favs, ...apps].map(appInfo => appInfo.get_id());
+    this._laters.remove(this._redisplayLater);
+    this._redisplayLater = 0;
   }
 
   _redisplay() {
+    this._clearRedisplayLater();
+
     this._animateRedisplay(() => {
+      this._clearRedisplayLater();
+
       this._redisplayLater = this._laters.add(Meta.LaterType.IDLE, () => {
+        this._redisplayLater = 0;
+
         this._favoritesView.destroy_all_children();
         this._mainView.destroy_all_children();
 
@@ -448,6 +385,10 @@ class VerticalAppDisplay extends St.Widget {
         }
         for (const category in this._categoryViews) {
           if (this._categoryViews[category]) {
+            const layoutManager = this._categoryViews[category].get_layout_manager();
+            if (layoutManager)
+              layoutManager.destroy();
+
             this._categoryViews[category].destroy();
             this._categoryViews[category] = null;
           }
@@ -568,8 +509,17 @@ class VerticalAppDisplay extends St.Widget {
     this._overview.disconnectObject(this);
     this._settings.disconnectObject(this);
 
-    if (this._redisplayLater) {
-      this._laters.remove(this._redisplayLater);
+    this._clearRedisplayLater();
+
+    const views = [this._favoritesView, this._mainView, ...Object.values(this._categoryViews ?? {})];
+
+    for (const view of views) {
+      if (!view)
+        continue;
+
+      const layoutManager = view.get_layout_manager();
+      if (layoutManager)
+        layoutManager.destroy();
     }
 
     for (const appIcon of this._appIcons) {
@@ -768,7 +718,10 @@ class VerticalScrollView extends St.ScrollView {
   destroy() {
     if (this._scrollAnim.lock) {
       global.stage.disconnect(this._scrollAnim.lock);
+      this._scrollAnim.lock = null;
     }
+
+    super.destroy();
   }
 
   get scroll() {
@@ -870,6 +823,7 @@ class VerticalLayout extends Clutter.LayoutManager {
   }
 
   destroy() {
+    // Clutter.LayoutManager 没有 destroy()，由持有它的 Viewport 在销毁前显式调用
     this._settings.disconnectObject(this);
   }
 });

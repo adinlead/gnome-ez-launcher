@@ -70,7 +70,7 @@ This project is a fork of [Vertical App Grid](https://github.com/lublst/gnome-ve
 
 ```
 src/
-├── searchStrategies.js      ← 读音检索框架入口：注册表 + 接口文档 + AI 提示
+├── searchStrategies.js      ← 读音检索框架入口：注册表 + 接口文档 + 开发提示
 ├── extension.js             ← Shell 扩展主逻辑：覆写 AppSearchProvider
 ├── prefs.js / prefs.ui      ← 偏好设置界面（策略下拉框自动填充）
 ├── schemas/                 ← GSettings schema
@@ -89,7 +89,7 @@ src/
 2. 按需要编写匹配引擎 `engine.js` 和静态词典 `data.js`（欧洲语言去变音归一化甚至不需要词典文件）
 3. 在 `src/searchStrategies.js` 底部注册：`import { newStrategy } from './strategies/<语言-id>/index.js'; registerStrategy(newStrategy);`
 
-完成后设置下拉框自动出现该选项，`auto` 模式下按当前语言主子标签自动命中。详细接口契约与 AI 提示见 [src/searchStrategies.js](file:///home/adinlead/Projects/gnome/gnome-vertical-app-grid/src/searchStrategies.js) 头部注释与 [src/strategies/README.md](file:///home/adinlead/Projects/gnome/gnome-vertical-app-grid/src/strategies/README.md)。
+完成后设置下拉框自动出现该选项，`auto` 模式下按当前语言主子标签自动命中。详细接口契约与开发提示见 [searchStrategies.js](src/searchStrategies.js) 头部注释与 [strategies/README.md](src/strategies/README.md)。
 
 ### 常用命令
 
@@ -108,7 +108,7 @@ The framework keeps each strategy in its own subdirectory — adding a new langu
 2. Add `engine.js` for the matcher and `data.js` for a static dictionary if needed (European-language accent folding needs no dictionary file at all)
 3. Register at the bottom of `src/searchStrategies.js`: `import { newStrategy } from './strategies/<lang-id>/index.js'; registerStrategy(newStrategy);`
 
-Done — the preferences dropdown automatically shows the new option, and `auto` mode picks it up by the current language's primary subtag. Full interface contract and AI hints in [src/searchStrategies.js](file:///home/adinlead/Projects/gnome/gnome-vertical-app-grid/src/searchStrategies.js) header and [src/strategies/README.md](file:///home/adinlead/Projects/gnome/gnome-vertical-app-grid/src/strategies/README.md).
+Done — the preferences dropdown automatically shows the new option, and `auto` mode picks it up by the current language's primary subtag. Full interface contract and development notes in [searchStrategies.js](src/searchStrategies.js) header and [strategies/README.md](src/strategies/README.md).
 
 ### Useful Commands
 

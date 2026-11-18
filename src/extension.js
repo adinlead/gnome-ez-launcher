@@ -80,68 +80,83 @@ export default class VerticalAppGridExtension extends Extension {
       }
     });
 
-    this._enableReadingSearch();
+    this.enableReadingSearch();
   }
 
-  // 读音检索：覆写 Shell 内置 AppSearchProvider.getInitialResultSet，把按
-  // 读音匹配到的应用并入原生搜索结果（子搜索 getSubsearchResultSet 内部
-  // 转调本方法，无需重复覆写）。
-  // 具体策略由 reading-search 设置决定（off / auto / 策略 id），
-  // 策略接口与注册方式见 searchStrategies.js。
-  // 兼容性：GNOME Shell 48/49/50 中该类的位置与方法签名一致（均已核对）。
-  // TODO: Shell 大版本升级时需复核 getInitialResultSet 的参数与返回值形态（Promise<Array<id>>）。
-  _enableReadingSearch() {
+  /*
+    读音检索：覆写 Shell 内置 AppSearchProvider.getInitialResultSet，把按
+    读音匹配到的应用并入原生搜索结果（子搜索 getSubsearchResultSet 内部
+    转调本方法，无需重复覆写）。
+    具体策略由 reading-search 设置决定（off / auto / 策略 id），
+    策略接口与注册方式见 searchStrategies.js。
+    兼容性：GNOME Shell 48/49/50 中该类的位置与方法签名一致。
+    TODO: Shell 大版本升级时需复核 getInitialResultSet 的参数与返回值形态（Promise<Array<id>>）。
+   */
+  enableReadingSearch() {
     const extension = this;
+
     this._appSystem = Shell.AppSystem.get_default();
     this._appUsage = Shell.AppUsage.get_default();
     this._parentalControls = ParentalControlsManager.getDefault();
     this._searchIndex = null;
     this._searchIndexStrategyId = null;
     this._searchIndexDirty = true;
+
     this._installedChangedId = this._appSystem.connect('installed-changed', () => {
-      // 应用安装/卸载后索引整体失效，留待下次搜索时懒重建
+      // 应用安装/卸载后索引整体失效，等下次搜索时再懒重建
       this._searchIndexDirty = true;
     });
 
     // prefs 的「更新检索缓存」按钮（跨进程信号，见 gschema 注释）
-    this._cacheRefreshId = this._settings.connect('changed::search-cache-refresh',
-      () => this._refreshSearchCache());
+    this._cacheRefreshId = this._settings.connect('changed::search-cache-refresh', () => {
+      this.refreshSearchCache();
+    });
 
-    this._injectionManager.overrideMethod(AppDisplay.AppSearchProvider.prototype,
-      'getInitialResultSet', originalFn => function (terms, cancellable) {
+    this._injectionManager.overrideMethod(
+      AppDisplay.AppSearchProvider.prototype,
+      'getInitialResultSet',
+      originalFn => function (terms, cancellable) {
         const promise = originalFn.call(this, terms, cancellable);
 
         return promise.then(results => extension._appendReadingSearchResults(results, terms));
-      });
+      }
+    );
   }
 
-  // 手动更新检索缓存：对当前策略执行 updateCache()（若实现，允许异步，
-  // 如下载最新词典），随后作废并立即重建运行时索引。
-  // 当前无策略（off / auto 且语言无匹配）时无事可做，静默返回。
-  _refreshSearchCache() {
+  /**
+   * 手动更新检索缓存。
+   * 对当前策略执行 updateCache()（如果实现了的话，允许异步，比如下载最新词典），
+   * 然后作废并立即重建运行时索引。
+   * 当前没有可用策略（off / auto 且语言无匹配）时，直接返回。
+   */
+  refreshSearchCache() {
     const strategy = resolveStrategy(
       this._settings.get_string('reading-search'),
-      GLib.get_language_names());
+      GLib.get_language_names()
+    );
 
-    if (!strategy)
+    if (strategy == null) {
       return;
-
-    // 置空后立即重建，保证下一次搜索无需等待
-    const rebuild = () => {
-      this._searchIndex = null;
-      this._searchIndexStrategyId = null;
-      this._searchIndexDirty = true;
-      this._resolveSearchIndex();
-    };
+    }
 
     if (typeof strategy.updateCache === 'function') {
       Promise.resolve()
         .then(() => strategy.updateCache())
-        .then(rebuild)
+        .then(() => this.rebuildSearchIndex())
         .catch(e => logError(e, `updateCache failed for strategy '${strategy.id}'`));
     } else {
-      rebuild();
+      this.rebuildSearchIndex();
     }
+  }
+
+  /**
+   * 作废当前索引并立即重建，保证下一次搜索不用等待。
+   */
+  rebuildSearchIndex() {
+    this._searchIndex = null;
+    this._searchIndexStrategyId = null;
+    this._searchIndexDirty = true;
+    this._resolveSearchIndex();
   }
 
   // 解析当前生效的检索策略并按需重建索引；策略未变时复用已有索引，

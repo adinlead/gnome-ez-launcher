@@ -152,16 +152,17 @@ export class PinyinIndex {
     this._entries = [];
   }
 
-  // 返回命中的 id 列表（按加入顺序）；查询串的归一化在 matchSequence 内完成
+  // 返回命中的 id 列表（按加入顺序，已去重）；查询串的归一化在 matchSequence 内完成
   search(query) {
     if (!query)
       return [];
 
-    const out = [];
+    const ids = new Set();
     for (const entry of this._entries) {
       if (matchSequence(entry.seq, query))
-        out.push(entry.id);
+        ids.add(entry.id);
     }
-    return out;
+
+    return [...ids];
   }
 }

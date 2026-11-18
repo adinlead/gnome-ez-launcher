@@ -22,21 +22,21 @@ src/strategies/
 
 | 字段 | 类型 | 必须 | 说明 |
 |---|---|---|---|
-| `id` | string | ✅ | 唯一标识，存入 gsettings 的 `reading-search` 键；与目录名后缀对应（如 `zh-pinyin` 目录下 id 为 `pinyin`） |
-| `label` | string | ✅ | 设置界面展示名，会被 gettext 扫描 |
-| `locales` | string[] | ✅ | `auto` 模式下按语言主子标签自动选中的匹配列表（如 `['zh']`、`['ja']`） |
-| `createIndex()` | fn → Index | ✅ | 每次调用返回**全新**的索引实例，不能复用单例 |
-| `updateCache()` | fn → void/Promise | ❌ | 手动「更新检索缓存」时调用；拼音策略词典内置于扩展包故仅重置内存缓存 |
+| `id` | string | [✔] | 唯一标识，存入 gsettings 的 `reading-search` 键；与目录名后缀对应（如 `zh-pinyin` 目录下 id 为 `pinyin`） |
+| `label` | string | [✔] | 设置界面展示名，会被 gettext 扫描 |
+| `locales` | string[] | [✔] | `auto` 模式下按语言主子标签自动选中的匹配列表（如 `['zh']`、`['ja']`） |
+| `createIndex()` | fn → Index | [✔] | 每次调用返回**全新**的索引实例，不能复用单例 |
+| `updateCache()` | fn → void/Promise | [x] | 手动「更新检索缓存」时调用；拼音策略词典内置于扩展包故仅重置内存缓存 |
 
-Index 对象必须提供三个方法：
+Index 对象需提供以下方法（`clear()` 为可选）：
 
 | 方法 | 说明 |
 |---|---|
-| `add(id, names)` | 添加应用：`id` 为 `.desktop` id，`names` 为候选名列表（含 Name/GenericName/翻译条目），应全部建索引 |
+| `add(id, names)` | 添加应用：`id` 为 `.desktop` id，`names` 为候选名列表（当前调用方传入 `get_display_name()`；策略应能处理多个名称） |
 | `search(query)` | 返回命中的 id 数组即可，**不需要排序**——extension 会与原生搜索合并后按使用频率排序 |
-| `clear()` | 清空索引（应用增删后整体重建时调用） |
+| `clear()` | 可选：清空索引；当前框架通过丢弃旧实例重建，不依赖该方法 |
 
-## 🚀 新增策略的三步走
+## 🚀 新增策略三步走
 
 以「日语罗马字搜索」为例：
 
@@ -71,16 +71,6 @@ registerStrategy(romajiStrategy);
 
 **完成**——设置下拉框自动多出该选项，`auto` 模式下 `ja_JP.UTF-8` 用户自动命中。
 
-## 🧪 测试建议
-
-`zh-pinyin` 的单元测试用 GJS 独立跑（不依赖 GNOME Shell 运行时）：
-
-```bash
-gjs -m tools/test-pinyinSearch.js
-```
-
-新策略建议复用同样模式：测试文件放 `tools/` 下，纯 JS 逻辑便于 CI 校验。
-
 ## 📚 词典数据来源
 
 | 语种 | 推荐数据源 |
@@ -90,12 +80,50 @@ gjs -m tools/test-pinyinSearch.js
 | 韩语 | [kaist-ucs/jamo](https://github.com/kaist-ucs/jamo) 分解，或 [koalanlp](https://github.com/koalanlp/koalanlp) 语料 |
 | 越南语/欧洲语言 | 直接在 engine.js 里做 Unicode 归一化 + 去变音符号，**不需要**额外词典文件 |
 
-## 🤖 AI 开发提示
+## 🧪 测试
 
-当用户提出「给 XX 语也加读音搜索」时：
+```bash
+gjs -m tools/test-pinyinSearch.js
+```
 
-1. **不要改** `src/searchStrategies.js` 的框架代码和 `extension.js` 的覆写逻辑
-2. 按上面三步走新建策略目录，最小骨架是 `index.js`（engine/data 可省略——比如欧洲语言的去变音归一化只需要一个 Index 类）
-3. 接口契约的四个红线：`createIndex` 返回新实例、`add` 索引全部候选名、`search` 不排序、`updateCache` 允许异步
-4. 参考 `zh-pinyin/` 的实现模式，但**不要直接复制** DP 匹配——越南语/欧洲语言只需要字符串归一化，逻辑更简单
-5. 注册完成后跑一下 `gjs -m tools/test-pinyinSearch.js`（或写新测试）确认框架没被破坏
+新策略建议复用同样模式：测试文件放 `tools/` 下，纯 JS 逻辑便于 CI 校验。
+
+---
+
+## 开发提示
+
+> 更完整的框架说明见 `src/searchStrategies.js` 头部注释。
+
+### 策略接入说明
+
+- 要给某个语种加读音搜索时，不要改 `src/searchStrategies.js` 的框架代码，只需要在 `src/strategies/` 下新建目录，然后在文件底部注册就行。
+- `extension.js` 里的覆写逻辑是所有策略共用的，没事不要动它。
+
+### 策略目录结构
+
+每个策略目录至少要有 `index.js`（导出策略对象），其它文件按需：
+
+```
+src/strategies/ja-romaji/
+  ├── index.js      ← 必须：策略定义
+  ├── engine.js     ← 可选：匹配引擎，可以参考 zh-pinyin/engine.js
+  └── data.js       ← 可选：静态词典，不需要词典的话就不用建
+```
+
+### 接口说明
+
+- `createIndex()` 每次都要返回全新的索引实例，不能复用单例；extension.js 在应用增删后会丢弃旧索引，下次搜索时重建，旧实例不能残留状态。
+- `add(id, names)` 里的 `names` 是候选应用名列表，策略应全部建索引，这样命中率才高。
+- `search(query)` 返回命中的 id 数组就可以了，不需要排序；extension.js 会跟原生搜索合并后再按使用频率排。
+- `updateCache()` 可以返回 Promise，如果策略要联网下词典，这里是唯一的入口；拼音词典内置在扩展包里，所以只重置内存缓存。
+
+### locale 匹配
+
+`locales` 里填语言主子标签（比如 `['ja']`、`['ko']`），框架会把 `GLib.get_language_names()` 的每一项按 `split(/[-_.@]/)[0]` 截断后比对，所以 `ja_JP.UTF-8` 也能命中 `['ja']`。多语种环境下第一个匹配到的策略胜出。
+
+### 词典从哪来
+
+- **中文**：mozillazg/pinyin-data，已经用 `tools/gen-pinyin-data.py` 提过了
+- **日语**：kazuhikoarase/yomigana-dict 或 sudachidict 都可以
+- **韩语**：kaist-ucs/jamo 分解，或者用 koalanlp 的语料
+- **越南语/欧洲语言**：直接在 engine.js 里做 Unicode 归一化和去变音符号，不需要额外词典文件
